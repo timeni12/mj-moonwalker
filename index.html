@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>MJ : Moonwalker Experience</title>
+    <!-- On charge Tailwind pour le design moderne, et Press Start pour le côté Arcade -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --neon-blue: #00f2ff; --neon-pink: #ff00de; }
+        
+        body { 
+            background-color: #050505; 
+            color: white; 
+            font-family: 'Press Start 2P', cursive; 
+            margin: 0; 
+            overflow-x: hidden; 
+        }
+
+        /* Effet de balayage CRT (Vieille TV) */
+        .crt-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
+            pointer-events: none; z-index: 100;
+        }
+
+        /* Zone de Jeu */
+        #game-world {
+            position: relative; width: 100%; height: 60vh;
+            background: linear-gradient(to bottom, #12042d 0%, #000 100%);
+            border-bottom: 4px solid var(--neon-blue);
+            overflow: hidden;
+        }
+
+        /* LE PERSONNAGE (Réglé pour hq720.jpg) */
+        #mj-player {
+            width: 180px; height: 250px; /* Taille d'une pose */
+            background-image: url('hq720.jpg'); 
+            background-size: 720px auto; /* 4 poses de 180px = 720px */
+            background-repeat: no-repeat;
+            position: absolute; 
+            bottom: 20px; 
+            left: 50px;
+            image-rendering: pixelated; /* Garde l'aspect pixel net */
+            transition: left 0.1s, bottom 0.1s;
+            z-index: 20;
+        }
+
+        /* Décalage des poses */
+        .pose-1 { background-position: 0px 0px; }
+        .pose-2 { background-position: -180px 0px; }
+        .pose-3 { background-position: -360px 0px; }
+        .pose-4 { background-position: -540px 0px; }
+
+        /* Animation Magie */
+        @keyframes magicFlash {
+            0% { filter: brightness(1) hue-rotate(0deg); }
+            50% { filter: brightness(3) hue-rotate(180deg); }
+            100% { filter: brightness(1) hue-rotate(0deg); }
+        }
+        .magic-active { animation: magicFlash 0.5s ease-in-out; }
+
+        /* Style des textes néon */
+        .neon-text { text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink); }
+    </style>
+</head>
+<body class="bg-black">
+    <div class="crt-overlay"></div>
+
+    <!-- BARRE DE SCORE (HUD) -->
+    <nav class="p-4 flex justify-between items-center bg-black border-b-2 border-gray-800">
+        <div class="text-[10px] text-cyan-400">P1: <span id="hp">||||||||||</span></div>
+        <div class="text-xs neon-text">MOONWALKER EO</div>
+        <div class="text-[10px] text-yellow-400">SCORE: <span id="score">000000</span></div>
+    </nav>
+
+    <!-- ESPACE DE JEU -->
+    <div id="game-world">
+        <!-- Michael est ici -->
+        <div id="mj-player" class="pose-1"></div>
+        
+        <!-- Instructions flottantes -->
+        <div class="absolute top-5 right-5 text-[8px] text-gray-500">
+            FLÈCHES : BOUGER | ESPACE : DANCE MAGIC
+        </div>
+    </div>
+
+    <!-- SECTION ARCHIVES (INFORMATIONS) -->
+    <section class="max-w-6xl mx-auto py-16 px-6">
+        <h2 class="text-2xl text-center mb-12 text-pink-500">DATABASE : MJ ARCHIVES</h2>
+        
+        <div class="grid md:grid-cols-2 gap-10">
+            <div class="p-6 border-2 border-cyan-900 bg-gray-900/20">
+                <h3 class="text-cyan-400 mb-4 text-sm">[ ARCHIVE 01 : MOONWALKER ]</h3>
+                <p class="text-[10px] leading-relaxed text-gray-400">
+                    Sorti en 1990 par SEGA. Michael Jackson a personnellement supervisé la création du jeu. 
+                    Son mouvement signature, le Moonwalk, permet de se déplacer tout en faisant face aux ennemis, 
+                    une prouesse technique pour l'époque.
+                </p>
+            </div>
+
+            <div class="p-6 border-2 border-purple-900 bg-gray-900/20">
+                <h3 class="text-purple-400 mb-4 text-sm">[ ARCHIVE 02 : CAPTAIN EO ]</h3>
+                <p class="text-[10px] leading-relaxed text-gray-400">
+                    Collaboration entre Lucasfilm, Disney et MJ en 1986. Captain EO est un héros galactique 
+                    qui transforme ses ennemis par le pouvoir de la musique. Une inspiration majeure pour 
+                    l'esthétique de ce site.
+                </p>
+            </div>
+        </div>
+
+        <!-- Petite Timeline -->
+        <div class="mt-16 text-center">
+            <p class="text-yellow-600 text-[10px]">-- INSERT COIN TO UNLOCK MORE FILES --</p>
+        </div>
+    </section>
+
+    <script>
+        const mj = document.getElementById('mj-player');
+        const scoreElement = document.getElementById('score');
+        let posX = 50;
+        let posY = 20;
+        let score = 0;
+        let currentPose = 1;
+
+        // Gestion des touches du clavier
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                posX += 20;
+                cycleWalkPoses();
+            }
+            if (e.key === 'ArrowLeft') {
+                posX -= 20;
+                cycleWalkPoses();
+            }
+            if (e.key === 'ArrowUp') {
+                posY += 10;
+                cycleWalkPoses();
+            }
+            if (e.key === 'ArrowDown') {
+                posY -= 10;
+                cycleWalkPoses();
+            }
+            
+            // Touche Espace pour l'Attaque Magique
+            if (e.key === ' ') {
+                triggerMagic();
+            }
+
+            // Mise à jour de la position
+            mj.style.left = posX + 'px';
+            mj.style.bottom = posY + 'px';
+        });
+
+        // Alterne entre les 3 premières poses pour la marche
+        function cycleWalkPoses() {
+            currentPose = currentPose < 3 ? currentPose + 1 : 1;
+            mj.className = `pose-${currentPose}`;
+        }
+
+        // Action spéciale Magie (Pose 4)
+        function triggerMagic() {
+            mj.className = 'pose-4';
+            mj.classList.add('magic-active');
+            score += 500;
+            scoreElement.innerText = score.toString().padStart(6, '0');
+
+            setTimeout(() => {
+                mj.classList.remove('magic-active');
+                mj.className = 'pose-1';
+            }, 500);
+        }
+    </script>
+</body>
+</html>

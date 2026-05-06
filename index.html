@@ -2,8 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MJ : Moonwalker Experience</title>
-    <!-- On charge Tailwind pour le design moderne, et Press Start pour le côté Arcade -->
+    <!-- Chargement des outils externes : Tailwind pour le design et Google Fonts pour le style Arcade -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
@@ -18,7 +19,7 @@
             overflow-x: hidden; 
         }
 
-        /* Effet de balayage CRT (Vieille TV) */
+        /* Effet Scanlines (Vieille Télé) */
         .crt-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
@@ -26,7 +27,7 @@
             pointer-events: none; z-index: 100;
         }
 
-        /* Zone de Jeu */
+        /* Décor de l'espace */
         #game-world {
             position: relative; width: 100%; height: 60vh;
             background: linear-gradient(to bottom, #12042d 0%, #000 100%);
@@ -34,27 +35,27 @@
             overflow: hidden;
         }
 
-        /* LE PERSONNAGE (Réglé pour hq720.jpg) */
+        /* LE PERSONNAGE (Utilise hq720.jpg) */
         #mj-player {
-            width: 180px; height: 250px; /* Taille d'une pose */
+            width: 180px; height: 250px; 
             background-image: url('hq720.jpg'); 
-            background-size: 720px auto; /* 4 poses de 180px = 720px */
+            background-size: 720px auto; /* 4 poses de 180px */
             background-repeat: no-repeat;
             position: absolute; 
             bottom: 20px; 
             left: 50px;
-            image-rendering: pixelated; /* Garde l'aspect pixel net */
+            image-rendering: pixelated;
             transition: left 0.1s, bottom 0.1s;
             z-index: 20;
         }
 
-        /* Décalage des poses */
+        /* Positions des Sprites */
         .pose-1 { background-position: 0px 0px; }
         .pose-2 { background-position: -180px 0px; }
         .pose-3 { background-position: -360px 0px; }
         .pose-4 { background-position: -540px 0px; }
 
-        /* Animation Magie */
+        /* Animation Flash Magique */
         @keyframes magicFlash {
             0% { filter: brightness(1) hue-rotate(0deg); }
             50% { filter: brightness(3) hue-rotate(180deg); }
@@ -62,58 +63,68 @@
         }
         .magic-active { animation: magicFlash 0.5s ease-in-out; }
 
-        /* Style des textes néon */
         .neon-text { text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink); }
     </style>
 </head>
 <body class="bg-black">
     <div class="crt-overlay"></div>
 
-    <!-- BARRE DE SCORE (HUD) -->
+    <!-- HUD (Barre de statut) -->
     <nav class="p-4 flex justify-between items-center bg-black border-b-2 border-gray-800">
         <div class="text-[10px] text-cyan-400">P1: <span id="hp">||||||||||</span></div>
-        <div class="text-xs neon-text">MOONWALKER EO</div>
+        <div class="text-xs neon-text tracking-tighter">MOONWALKER : EO EDITION</div>
         <div class="text-[10px] text-yellow-400">SCORE: <span id="score">000000</span></div>
     </nav>
 
-    <!-- ESPACE DE JEU -->
+    <!-- ZONE DE JEU INTERACTIVE -->
     <div id="game-world">
-        <!-- Michael est ici -->
         <div id="mj-player" class="pose-1"></div>
-        
-        <!-- Instructions flottantes -->
-        <div class="absolute top-5 right-5 text-[8px] text-gray-500">
-            FLÈCHES : BOUGER | ESPACE : DANCE MAGIC
+        <div class="absolute top-5 right-5 text-[8px] text-gray-500 animate-pulse">
+            ARROWS TO MOVE | SPACE FOR MAGIC
         </div>
     </div>
 
-    <!-- SECTION ARCHIVES (INFORMATIONS) -->
+    <!-- SECTION MISSIONS (PARTIE INFORMATIVE) -->
     <section class="max-w-6xl mx-auto py-16 px-6">
-        <h2 class="text-2xl text-center mb-12 text-pink-500">DATABASE : MJ ARCHIVES</h2>
+        <h2 class="text-2xl text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
+            SELECT MISSION
+        </h2>
         
-        <div class="grid md:grid-cols-2 gap-10">
-            <div class="p-6 border-2 border-cyan-900 bg-gray-900/20">
-                <h3 class="text-cyan-400 mb-4 text-sm">[ ARCHIVE 01 : MOONWALKER ]</h3>
-                <p class="text-[10px] leading-relaxed text-gray-400">
-                    Sorti en 1990 par SEGA. Michael Jackson a personnellement supervisé la création du jeu. 
-                    Son mouvement signature, le Moonwalk, permet de se déplacer tout en faisant face aux ennemis, 
-                    une prouesse technique pour l'époque.
+        <div class="grid md:grid-cols-3 gap-8">
+            
+            <!-- MISSION 1: THRILLER (Avec ton image IA) -->
+            <div class="border-4 border-gray-800 p-4 hover:border-red-600 transition-colors group cursor-pointer bg-black">
+                <div class="bg-black h-48 mb-4 flex items-center justify-center overflow-hidden border-2 border-red-900">
+                    <img src="thriller.png" alt="Thriller Icon" class="h-full object-contain group-hover:scale-110 transition-transform">
+                </div>
+                <h3 class="text-xs text-red-500 mb-2">MISSION: THRILLER</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed">
+                    1982. L'album de tous les records. Le clip a redéfini le format court-métrage avec ses maquillages cultes et sa chorégraphie zombie.
                 </p>
             </div>
 
-            <div class="p-6 border-2 border-purple-900 bg-gray-900/20">
-                <h3 class="text-purple-400 mb-4 text-sm">[ ARCHIVE 02 : CAPTAIN EO ]</h3>
-                <p class="text-[10px] leading-relaxed text-gray-400">
-                    Collaboration entre Lucasfilm, Disney et MJ en 1986. Captain EO est un héros galactique 
-                    qui transforme ses ennemis par le pouvoir de la musique. Une inspiration majeure pour 
-                    l'esthétique de ce site.
+            <!-- MISSION 2: BAD / MOONWALKER -->
+            <div class="border-4 border-gray-800 p-4 hover:border-cyan-400 transition-colors group cursor-pointer bg-black">
+                <div class="bg-gray-900 h-48 mb-4 flex items-center justify-center border-2 border-cyan-900">
+                    <span class="text-4xl group-hover:animate-bounce">👔</span>
+                </div>
+                <h3 class="text-xs text-cyan-400 mb-2">MISSION: BAD</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed">
+                    1987. Michael devient le King of Pop. Sortie du film Moonwalker et du clip Smooth Criminal aux effets gravitationnels impossibles.
                 </p>
             </div>
-        </div>
 
-        <!-- Petite Timeline -->
-        <div class="mt-16 text-center">
-            <p class="text-yellow-600 text-[10px]">-- INSERT COIN TO UNLOCK MORE FILES --</p>
+            <!-- MISSION 3: CAPTAIN EO -->
+            <div class="border-4 border-gray-800 p-4 hover:border-purple-600 transition-colors group cursor-pointer bg-black">
+                <div class="bg-gray-900 h-48 mb-4 flex items-center justify-center border-2 border-purple-900">
+                    <span class="text-4xl group-hover:rotate-12 transition-transform">🚀</span>
+                </div>
+                <h3 class="text-xs text-purple-500 mb-2">MISSION: EO</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed">
+                    1986. Collaboration avec Lucasfilm et Disney. Une odyssée spatiale où la musique sauve une planète de l'obscurité.
+                </p>
+            </div>
+
         </div>
     </section>
 
@@ -125,52 +136,37 @@
         let score = 0;
         let currentPose = 1;
 
-        // Gestion des touches du clavier
+        // Contrôles Clavier
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') {
-                posX += 20;
-                cycleWalkPoses();
-            }
-            if (e.key === 'ArrowLeft') {
-                posX -= 20;
-                cycleWalkPoses();
-            }
-            if (e.key === 'ArrowUp') {
-                posY += 10;
-                cycleWalkPoses();
-            }
-            if (e.key === 'ArrowDown') {
-                posY -= 10;
-                cycleWalkPoses();
-            }
+            if (e.key === 'ArrowRight') { posX += 25; cycleWalk(); }
+            if (e.key === 'ArrowLeft') { posX -= 25; cycleWalk(); }
+            if (e.key === 'ArrowUp') { posY += 15; cycleWalk(); }
+            if (e.key === 'ArrowDown') { posY -= 15; cycleWalk(); }
             
-            // Touche Espace pour l'Attaque Magique
-            if (e.key === ' ') {
-                triggerMagic();
-            }
+            if (e.key === ' ') { triggerMagic(); }
 
-            // Mise à jour de la position
+            // Application des mouvements
             mj.style.left = posX + 'px';
             mj.style.bottom = posY + 'px';
         });
 
-        // Alterne entre les 3 premières poses pour la marche
-        function cycleWalkPoses() {
+        // Animation de marche (alternance poses 1 à 3)
+        function cycleWalk() {
             currentPose = currentPose < 3 ? currentPose + 1 : 1;
             mj.className = `pose-${currentPose}`;
         }
 
-        // Action spéciale Magie (Pose 4)
+        // Attaque Magique (Pose 4)
         function triggerMagic() {
             mj.className = 'pose-4';
             mj.classList.add('magic-active');
-            score += 500;
+            score += 777;
             scoreElement.innerText = score.toString().padStart(6, '0');
 
             setTimeout(() => {
                 mj.classList.remove('magic-active');
                 mj.className = 'pose-1';
-            }, 500);
+            }, 600);
         }
     </script>
 </body>

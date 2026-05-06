@@ -3,214 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MJ : Moonwalker Experience - Ultra</title>
+    <title>MJ : Moonwalker - Ultimate Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
     <style>
-        :root { --neon-blue: #00f2ff; --neon-pink: #ff00de; }
-        
-        body { 
-            background-color: #050505; 
-            color: white; 
-            font-family: 'Press Start 2P', cursive; 
-            margin: 0; 
-            overflow-x: hidden; 
-        }
+        :root { --neon-blue: #00f2ff; --neon-pink: #ff00de; --neon-purple: #bc13fe; }
+        body { background: #000; color: white; font-family: 'Press Start 2P', cursive; margin: 0; overflow-x: hidden; }
 
-        /* --- EFFETS VISUELS --- */
-
-        /* Effet Scanlines (Téléviseur Cathodique) */
+        /* EFFET TÉLÉ CRT */
         .crt-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
-            background-size: 100% 4px;
-            pointer-events: none; z-index: 100;
+            background-size: 100% 4px; pointer-events: none; z-index: 100;
         }
 
-        /* Étoiles Animées en fond */
-        @keyframes moveStars {
-            from { background-position: 0 0; }
-            to { background-position: -1000px 1000px; }
-        }
+        /* SUPPRESSION DU NOIR AUTOMATIQUE */
+        img { mix-blend-mode: screen; image-rendering: pixelated; }
+
+        /* MONDE DE JEU */
         #game-world {
-            position: relative; 
-            width: 100%; 
-            height: 70vh;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%),
-                        url('https://www.transparenttextures.com/patterns/stardust.png');
-            animation: moveStars 100s linear infinite;
-            border-bottom: 4px solid var(--neon-blue);
-            overflow: hidden;
+            position: relative; width: 100%; height: 65vh;
+            background: radial-gradient(circle at center, #1b033a 0%, #000 100%);
+            border-bottom: 4px solid var(--neon-blue); overflow: hidden;
         }
 
-        /* Scintillement du Néon */
-        @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% { text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink); }
-            20%, 24%, 55% { text-shadow: none; }
-        }
-        .neon-flicker { animation: flicker 3s infinite alternate; }
+        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.8; animation: moveStars 8s linear infinite; }
+        @keyframes moveStars { from { transform: translateX(100vw); } to { transform: translateX(-15vw); } }
 
-        /* --- LE JOUEUR --- */
+        /* ENNEMIS */
+        .enemy { position: absolute; height: 160px; z-index: 40; }
 
-        #mj-player {
-            position: absolute; 
-            bottom: 40px; 
-            left: 100px;
-            z-index: 20;
-            transition: left 0.15s ease-out, bottom 0.15s ease-out;
+        /* ANIMATIONS */
+        .click-animate { animation: clickPulse 0.4s ease-out; }
+        @keyframes clickPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); filter: brightness(2) drop-shadow(0 0 15px var(--neon-blue)); }
+            100% { transform: scale(1); }
         }
 
-        #mj-sprite {
-            height: 280px; 
-            image-rendering: pixelated;
-            /* SUPPRESSION DU NOIR */
-            mix-blend-mode: screen; 
-            filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.5));
-        }
-
-        /* Flash de Magie */
-        @keyframes magicFlash {
-            0% { filter: brightness(1) drop-shadow(0 0 0 white); transform: scale(1); }
-            50% { filter: brightness(2) drop-shadow(0 0 40px var(--neon-blue)); transform: scale(1.1); }
-            100% { filter: brightness(1) drop-shadow(0 0 0 white); transform: scale(1); }
-        }
         .magic-active { animation: magicFlash 0.6s ease-in-out; }
-
-        /* Animation Flottante pour les Missions */
-        @keyframes floating {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes magicFlash {
+            0% { filter: brightness(1) drop-shadow(0 0 0 white); }
+            50% { filter: brightness(3) drop-shadow(0 0 50px var(--neon-blue)); }
+            100% { filter: brightness(1) drop-shadow(0 0 0 white); }
         }
-        .mission-card { animation: floating 4s ease-in-out infinite; }
-        .mission-card:nth-child(2) { animation-delay: 1s; }
-        .mission-card:nth-child(3) { animation-delay: 2s; }
 
+        .energy-bar { width: 200px; height: 15px; background: #111; border: 2px solid #444; }
+        #energy-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #00f2ff, #bc13fe); transition: width 0.3s; }
+        
+        .mission-card { transition: all 0.3s; cursor: pointer; border: 4px solid #1a1a1a; background: rgba(17, 24, 39, 0.6); }
+        .mission-card:hover { border-color: var(--neon-pink); transform: translateY(-5px); }
     </style>
 </head>
-<body class="bg-black">
+<body>
     <div class="crt-overlay"></div>
 
-    <!-- HUD (Barre de statut) -->
-    <nav class="p-4 flex justify-between items-center bg-black border-b-2 border-gray-800 relative z-50">
-        <div class="text-[8px] md:text-[10px] text-cyan-400">ENERGY: <span class="animate-pulse">||||||||||</span></div>
-        <div class="text-[10px] md:text-sm text-pink-500 neon-flicker tracking-widest uppercase">Moonwalker Experience</div>
-        <div class="text-[8px] md:text-[10px] text-yellow-400">SCORE: <span id="score">000000</span></div>
-    </nav>
+    <!-- HUD (Interface) -->
+    <header class="p-6 flex justify-between items-center bg-black border-b-2 border-gray-900">
+        <div>
+            <div class="text-[8px] text-cyan-400 mb-1">HEALTH MONITOR</div>
+            <div class="energy-bar"><div id="energy-fill"></div></div>
+        </div>
+        <div class="text-center">
+            <h1 class="text-[10px] text-white tracking-widest animate-pulse">MJ ARCHIVE v2.0</h1>
+            <div class="text-[7px] text-gray-500 mt-2">CAPTAIN EO PROTOCOL</div>
+        </div>
+        <div class="text-right">
+            <div class="text-[8px] text-pink-500">SCORE</div>
+            <div id="score" class="text-sm">000000</div>
+        </div>
+    </header>
 
     <!-- ZONE DE JEU -->
     <div id="game-world">
-        <div id="mj-player">
-            <img id="mj-sprite" src="mj1.png" alt="MJ">
+        <div id="mj-player" style="position: absolute; bottom: 40px; left: 100px; z-index: 50;">
+            <img id="mj-sprite" src="mj1.png" style="height: 240px;" alt="Michael Jackson">
         </div>
         
-        <!-- Particules de poussière d'étoiles (Décoratif) -->
-        <div class="absolute inset-0 pointer-events-none opacity-30"></div>
-        
-        <div class="absolute bottom-5 right-5 text-[8px] text-cyan-900 uppercase">
-            Use Arrows to Slide • Space for Magic
+        <!-- Instructions Flottantes -->
+        <div class="absolute bottom-4 right-4 bg-black/80 border-2 border-cyan-400 p-4 text-[7px] leading-loose">
+            <span class="text-cyan-400">COMMANDS:</span><br>
+            ARROWS : MOVE MJ<br>
+            SPACE : DANCE MAGIC (STRIKE)<br>
+            CLICK ITEMS : ACTIVATE DATA
         </div>
     </div>
 
-    <!-- SECTION MISSIONS -->
-    <section class="max-w-6xl mx-auto py-20 px-8">
-        <h2 class="text-xl text-center mb-20 text-cyan-400 tracking-widest uppercase">
-            — Mission Select —
-        </h2>
-        
-        <div class="grid md:grid-cols-3 gap-12">
-            
-            <!-- THRILLER -->
-            <div class="mission-card border-4 border-gray-900 p-6 hover:border-red-600 transition-all group bg-zinc-950 cursor-pointer">
-                <div class="bg-black h-52 mb-6 flex items-center justify-center overflow-hidden border-2 border-red-950">
-                    <img src="thriller.png" alt="Thriller" class="h-full object-contain group-hover:scale-110 transition-transform">
-                </div>
-                <h3 class="text-xs text-red-600 mb-4 uppercase">Mission: Thriller</h3>
-                <p class="text-[9px] text-gray-500 leading-relaxed">
-                    Survivez à la nuit. Transformez les zombies en danseurs. 1982.
-                </p>
+    <!-- MISSIONS & ARTICLES -->
+    <main class="max-w-6xl mx-auto py-16 px-6">
+        <h2 class="text-center text-[10px] mb-12 text-pink-500 tracking-[5px]">DATABASE MISSIONS</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="mission-card p-4" onclick="this.classList.add('click-animate')">
+                <img src="thriller.png" class="w-full h-40 object-contain mb-4" alt="Thriller">
+                <h3 class="text-[9px] text-red-500 mb-2">FILE: THRILLER</h3>
+                <p class="text-[7px] text-gray-400">1982 : Le chef-d'oeuvre qui a tout changé.</p>
             </div>
-
-            <!-- BAD -->
-            <div class="mission-card border-4 border-gray-900 p-6 hover:border-cyan-400 transition-all group bg-zinc-950 cursor-pointer">
-                <div class="bg-gray-900 h-52 mb-6 flex items-center justify-center border-2 border-cyan-950">
-                    <span class="text-6xl filter grayscale group-hover:grayscale-0 transition-all">🎩</span>
-                </div>
-                <h3 class="text-xs text-cyan-500 mb-4 uppercase">Mission: Bad</h3>
-                <p class="text-[9px] text-gray-500 leading-relaxed">
-                    Le King of Pop domine la ville. L'ère du Moonwalk parfait. 1987.
-                </p>
+            <div class="mission-card p-4" onclick="this.classList.add('click-animate')">
+                <img src="bad.png" class="w-full h-40 object-contain mb-4" alt="Bad">
+                <h3 class="text-[9px] text-cyan-400 mb-2">FILE: BAD / MOONWALKER</h3>
+                <p class="text-[7px] text-gray-400">1987 : L'innovation visuelle pure.</p>
             </div>
-
-            <!-- CAPTAIN EO -->
-            <div class="mission-card border-4 border-gray-900 p-6 hover:border-purple-600 transition-all group bg-zinc-950 cursor-pointer">
-                <div class="bg-gray-900 h-52 mb-6 flex items-center justify-center border-2 border-purple-950">
-                    <span class="text-6xl filter grayscale group-hover:grayscale-0 transition-all">🚀</span>
-                </div>
-                <h3 class="text-xs text-purple-500 mb-4 uppercase">Mission: EO</h3>
-                <p class="text-[9px] text-gray-500 leading-relaxed">
-                    L'odyssée spatiale. Changez le monde par la force de la musique. 1986.
-                </p>
+            <div class="mission-card p-4" onclick="this.classList.add('click-animate')">
+                <img src="eo.png" class="w-full h-40 object-contain mb-4" alt="EO">
+                <h3 class="text-[9px] text-purple-500 mb-2">FILE: CAPTAIN EO</h3>
+                <p class="text-[7px] text-gray-400">1986 : Mission spatiale Disney.</p>
             </div>
-
         </div>
-    </section>
+    </main>
 
-    <footer class="p-10 text-center text-[8px] text-gray-700 border-t border-gray-900">
-        &copy; 2026 MOONWALKER ARCADE PROJECT • NO COINS REQUIRED
+    <footer class="p-10 text-center border-t border-gray-900 bg-black">
+        <p class="text-[8px] text-gray-600">© 2026 MJ ARCHIVE • <a href="#" class="text-cyan-400">READ FULL ARTICLES</a></p>
     </footer>
 
     <script>
-        const mjSprite = document.getElementById('mj-sprite');
-        const mjPlayer = document.getElementById('mj-player');
-        const scoreElement = document.getElementById('score');
-        
-        let posX = 150;
-        let posY = 40;
-        let score = 0;
-        let walkFrame = 1;
-        let isMagic = false;
+        const mj = document.getElementById('mj-player');
+        const sprite = document.getElementById('mj-sprite');
+        const world = document.getElementById('game-world');
+        const scoreEl = document.getElementById('score');
+        const healthBar = document.getElementById('energy-fill');
 
-        // Limites du monde pour ne pas sortir de l'écran
-        const limitX = window.innerWidth - 150;
+        let mjX = 100, mjY = 40, score = 0, health = 100, isMagic = false;
+        let enemies = [];
 
+        // 1. DÉPLACEMENTS ET ANIMATION
         document.addEventListener('keydown', (e) => {
             if (isMagic) return;
 
-            // Déplacements (plus fluides)
-            if (e.key === 'ArrowRight' && posX < limitX) { posX += 35; updateAnimation(); }
-            if (e.key === 'ArrowLeft' && posX > 0) { posX -= 35; updateAnimation(); }
-            if (e.key === 'ArrowUp' && posY < 250) { posY += 25; updateAnimation(); }
-            if (e.key === 'ArrowDown' && posY > 20) { posY -= 25; updateAnimation(); }
-            
-            // Touche Espace
-            if (e.key === ' ' || e.code === 'Space') { 
-                triggerMagic();
+            if (e.key === 'ArrowRight') mjX += 25;
+            if (e.key === 'ArrowLeft') mjX -= 25;
+            if (e.key === 'ArrowUp') mjY += 15;
+            if (e.key === 'ArrowDown') mjY -= 15;
+
+            // Limites du décor
+            mjX = Math.max(0, Math.min(window.innerWidth - 100, mjX));
+            mjY = Math.max(0, Math.min(300, mjY));
+
+            mj.style.left = mjX + 'px';
+            mj.style.bottom = mjY + 'px';
+
+            // Cycle de marche mj1 -> mj2 -> mj3
+            if (e.key.includes('Arrow')) {
+                let walkFrame = Math.floor(Date.now() / 150) % 3 + 1;
+                sprite.src = `mj${walkFrame}.png`;
             }
 
-            mjPlayer.style.left = posX + 'px';
-            mjPlayer.style.bottom = posY + 'px';
+            // MAGIE (Combat)
+            if (e.key === ' ') triggerMagic();
         });
-
-        function updateAnimation() {
-            walkFrame = (walkFrame % 3) + 1; // 1, 2, 3
-            mjSprite.src = `mj${walkFrame}.png`;
-        }
 
         function triggerMagic() {
             isMagic = true;
-            mjSprite.src = 'mj4.png'; 
-            mjPlayer.classList.add('magic-active');
-            
-            score += 777;
-            scoreElement.innerText = score.toString().padStart(6, '0');
+            sprite.src = 'mj4.png';
+            mj.classList.add('magic-active');
+
+            // Élimine les ennemis proches
+            enemies.forEach((en, index) => {
+                let enPos = en.getBoundingClientRect();
+                let mjPos = mj.getBoundingClientRect();
+                let dist = Math.abs(enPos.left - mjPos.left);
+
+                if (dist < 350) {
+                    en.style.filter = "brightness(5) hue-rotate(180deg)";
+                    setTimeout(() => {
+                        if(en.parentNode) en.remove();
+                        enemies.splice(index, 1);
+                        score += 500;
+                        scoreEl.innerText = score.toString().padStart(6, '0');
+                    }, 300);
+                }
+            });
 
             setTimeout(() => {
-                mjPlayer.classList.remove('magic-active');
-                mjSprite.src = 'mj1.png';
+                mj.classList.remove('magic-active');
+                sprite.src = 'mj1.png';
                 isMagic = false;
             }, 600);
         }
+
+        // 2. APPARITION DES ENNEMIS (enemy1.png et enemy2.png)
+        function spawnEnemy() {
+            const en = document.createElement('img');
+            const type = Math.random() > 0.5 ? 'enemy1.png' : 'enemy2.png';
+            en.src = type;
+            en.className = 'enemy';
+            en.style.right = '-150px';
+            en.style.bottom = (Math.random() * 250 + 20) + 'px';
+            world.appendChild(en);
+            enemies.push(en);
+        }
+
+        // 3. LOGIQUE DU MONDE (Étoiles et Mouvement Ennemis)
+        setInterval(() => {
+            enemies.forEach((en, index) => {
+                let curRight = parseInt(en.style.right || -150);
+                en.style.right = (curRight + 8) + 'px';
+
+                // Collision avec MJ
+                let enLeft = window.innerWidth - curRight - 150;
+                let mjPos = parseInt(mj.style.left);
+                let dist = Math.abs(enLeft - mjPos);
+
+                if (dist < 60 && !isMagic) {
+                    health -= 0.5;
+                    healthBar.style.width = health + '%';
+                }
+
+                if (curRight > window.innerWidth) {
+                    en.remove();
+                    enemies.splice(index, 1);
+                }
+            });
+        }, 50);
+
+        // Étoiles de fond
+        setInterval(() => {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = star.style.height = Math.random() * 3 + 'px';
+            star.style.top = Math.random() * 100 + '%';
+            world.appendChild(star);
+            setTimeout(() => star.remove(), 8000);
+        }, 300);
+
+        setInterval(spawnEnemy, 3000);
     </script>
 </body>
 </html>
